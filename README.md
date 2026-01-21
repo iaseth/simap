@@ -11,7 +11,7 @@ npm install -g simap
 ## Usage
 
 ```bash
-simap <dirpath> <domain>
+simap <dirpath> <domain> [options]
 ```
 
 ### Arguments
@@ -19,14 +19,25 @@ simap <dirpath> <domain>
 - `dirpath` - Path to the directory containing your website files
 - `domain` - Your website's base URL (must include http:// or https://)
 
+### Options
+
+- `--ignore, -i <route>` - Ignore routes starting with the specified path (can be used multiple times)
+- `--help, -h` - Show help message
+
 ### Examples
 
 ```bash
 # Generate sitemap for a local public directory
 simap ./public https://example.com
 
-# Generate sitemap for an absolute path
-simap /var/www/html https://mysite.com
+# Ignore specific routes
+simap ./public https://example.com --ignore /admin --ignore /private
+
+# Using short flag
+simap ./public https://example.com -i /blog/draft -i /test
+
+# Multiple ignore patterns
+simap ./public https://example.com -i /api -i /internal -i /temp
 
 # Show help
 simap --help
@@ -41,6 +52,7 @@ simap --help
 - 🎯 SEO-friendly XML format
 - ⚙️ Configurable via programmatic API
 - 🚫 Automatically excludes common build/config folders
+- 🎭 Ignore specific routes with `--ignore` flag
 
 ## Default Behavior
 
@@ -88,7 +100,8 @@ await generateSitemap('./public', 'https://example.com', {
 	extensions: ['.html', '.htm', '.php'],
 	exclude: ['node_modules', 'temp'],
 	priority: 0.8,
-	changefreq: 'daily'
+	changefreq: 'daily',
+	ignoreRoutes: ['/admin', '/private', '/test']
 });
 ```
 
@@ -100,6 +113,7 @@ interface SitemapOptions {
 	exclude?: string[];           // Folders to exclude
 	priority?: number;            // URL priority (0.0 to 1.0)
 	changefreq?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
+	ignoreRoutes?: string[];      // Routes to ignore (prefix matching)
 }
 ```
 

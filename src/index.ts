@@ -11,6 +11,7 @@ interface SitemapUrl {
 interface SitemapResult {
 	outputPath: string;
 	urlCount: number;
+	ignoredCount: number;
 }
 
 interface SitemapOptions {
@@ -18,6 +19,7 @@ interface SitemapOptions {
 	exclude?: string[];
 	priority?: number;
 	changefreq?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
+	ignoreRoutes?: string[];
 }
 
 /**
@@ -126,10 +128,11 @@ export async function generateSitemap(
 	options: SitemapOptions = {}
 ): Promise<SitemapResult> {
 	const {
-		extensions = ['.html', '.htm'],
+		extensions = ['.html'],
 		exclude = ['node_modules', '.git', 'dist', '.next', '.nuxt'],
 		priority = 0.5,
-		changefreq = 'weekly'
+		changefreq = 'weekly',
+		ignoreRoutes = []
 	} = options;
 
 	// Remove trailing slash from domain
@@ -139,7 +142,7 @@ export async function generateSitemap(
 	const files = scanDirectory(dirPath, dirPath, extensions, exclude);
 
 	// Generate URLs
-	const urls: SitemapUrl[] = files.map(filePath => {
+	const allUrls: SitemapUrl[] = files.map(filePath => {
 		const urlPath = filePathToUrl(filePath, dirPath);
 		const lastmod = getLastModified(filePath);
 
@@ -151,11 +154,19 @@ export async function generateSitemap(
 		};
 	});
 
+	// Filter out ignored routes
+	const filteredUrls = allUrls.filter(url => {
+		const urlPath = url.loc.replace(baseDomain, '');
+		return !ignoreRoutes.some(ignorePath => urlPath.startsWith(ignorePath));
+	});
+
+	const ignoredCount = allUrls.length - filteredUrls.length;
+
 	// Sort URLs alphabetically
-	urls.sort((a, b) => a.loc.localeCompare(b.loc));
+	filteredUrls.sort((a, b) => a.loc.localeCompare(b.loc));
 
 	// Generate XML
-	const xml = generateSitemapXml(urls);
+	const xml = generateSitemapXml(filteredUrls);
 
 	// Write to file
 	const outputPath = path.join(dirPath, 'sitemap.xml');
@@ -163,7 +174,8 @@ export async function generateSitemap(
 
 	return {
 		outputPath,
-		urlCount: urls.length
+		urlCount: filteredUrls.length,
+		ignoredCount
 	};
 }
 
