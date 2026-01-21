@@ -1,0 +1,35 @@
+{
+	"name": "simap",
+	"version": "0.1.0",
+	"description": "Generate sitemap.xml from directory structure",
+	"main": "dist/index.js",
+	"bin": {
+		"simap": "dist/cli.js"
+	},
+	"scripts": {
+		"build": "tsc",
+		"prepublishOnly": "npm run build",
+		"dev": "tsc --watch"
+	},
+	"keywords": [
+		"sitemap",
+		"xml",
+		"seo",
+		"generator",
+		"cli"
+	],
+	"author": "Ankur Seth",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^20.0.0",
+		"typescript": "^5.0.0"
+	},
+	"engines": {
+		"node": ">=16.0.0"
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	]
+}
